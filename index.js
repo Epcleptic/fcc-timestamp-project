@@ -18,12 +18,44 @@ app.get("/", function (req, res) {
   res.sendFile(__dirname + "/views/index.html");
 });
 
+app.get("/api", function (req, res) {
+  const utc = req.query.utc;
+  const unix = req.query.unix;
+
+  let date = null;
+
+  if (utc) {
+    if (isNaN(utc)) {
+      res.json({
+        error: "Invalid Date",
+      });
+      return;
+    }
+    date = new Date(Number(utc));
+  } else if (unix) {
+    if (isNaN(Date.parse(unix))) {
+      res.json({
+        error: "Invalid Date",
+      });
+      return;
+    }
+    date = new Date(Date.parse(unix));
+  } else {
+    date = new Date();
+  }
+
+  res.json({
+    unix: date.getTime(),
+    utc: date.toUTCString(),
+  });
+});
+
 app.get("/api/:input", function (req, res) {
   const input = req.params.input;
 
   if (isNaN(input) && isNaN(Date.parse(input))) {
     res.json({
-      error: "Not a date",
+      error: "Invalid Date",
     });
     return;
   }
